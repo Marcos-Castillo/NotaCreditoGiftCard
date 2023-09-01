@@ -1,0 +1,15 @@
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\bin\Debug\net6.0\NotaCreditoGiftCard.exe
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\bin\Debug\net6.0\NotaCreditoGiftCard.deps.json
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\bin\Debug\net6.0\NotaCreditoGiftCard.runtimeconfig.json
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\bin\Debug\net6.0\NotaCreditoGiftCard.dll
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\bin\Debug\net6.0\NotaCreditoGiftCard.pdb
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\NotaCreditoGiftCard.csproj.AssemblyReference.cache
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\NotaCreditoGiftCard.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\NotaCreditoGiftCard.AssemblyInfoInputs.cache
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\NotaCreditoGiftCard.AssemblyInfo.cs
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\NotaCreditoGiftCard.csproj.CoreCompileInputs.cache
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\NotaCreditoGiftCard.dll
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\refint\NotaCreditoGiftCard.dll
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\NotaCreditoGiftCard.pdb
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\NotaCreditoGiftCard.genruntimeconfig.cache
+C:\Users\mcastillo\Desktop\Desarollo\NotaCreditoGiftCard\NotaCreditoGiftCard\obj\Debug\net6.0\ref\NotaCreditoGiftCard.dll
