@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mcastillo\\Desktop\\Desarollo\\NotaCreditoGiftCard\\NotaCreditoGiftCard\\NotaCreditoGiftCard.csproj",
+      "projectUniqueName": "C:\\Users\\mcastillo\\Desktop\\Desarollo\\NCGC\\NotaCreditoGiftCard\\NotaCreditoGiftCard\\NotaCreditoGiftCard.csproj",
       "projectName": "NotaCreditoGiftCard",
-      "projectPath": "C:\\Users\\mcastillo\\Desktop\\Desarollo\\NotaCreditoGiftCard\\NotaCreditoGiftCard\\NotaCreditoGiftCard.csproj",
+      "projectPath": "C:\\Users\\mcastillo\\Desktop\\Desarollo\\NCGC\\NotaCreditoGiftCard\\NotaCreditoGiftCard\\NotaCreditoGiftCard.csproj",
       "packagesPath": "C:\\Users\\mcastillo\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mcastillo\\Desktop\\Desarollo\\NotaCreditoGiftCard\\NotaCreditoGiftCard\\obj\\",
+      "outputPath": "C:\\Users\\mcastillo\\Desktop\\Desarollo\\NCGC\\NotaCreditoGiftCard\\NotaCreditoGiftCard\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\mcastillo\\AppData\\Roaming\\NuGet\\NuGet.Config",
