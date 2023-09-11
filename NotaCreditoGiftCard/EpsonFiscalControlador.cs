@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System.Collections;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace NotaCreditoGiftCard
@@ -172,32 +163,141 @@ namespace NotaCreditoGiftCard
         // ImprimirItem()
         [System.Runtime.InteropServices.DllImport("EpsonFiscalInterface.dll", CharSet = System.Runtime.InteropServices.CharSet.Ansi,
                                                                                 CallingConvention = System.Runtime.InteropServices.CallingConvention.StdCall)]
-        public static extern int ImprimirItem(int id_modificador, String descripcion, 
-        String cantidad, String precio, int id_tasa_iva,int ii_id, String ii_valor, 
-        int id_codigo, String codigo, String codigo_unidad_matrix,int código_unidad_medida);
+        public static extern int ImprimirItem(int id_modificador, String descripcion,
+        String cantidad, String precio, int id_tasa_iva, int ii_id, String ii_valor,
+        int id_codigo, String codigo, String codigo_unidad_matrix, int código_unidad_medida);
+
+        // ConsultarNumeroComprobanteUltimo()
+        [System.Runtime.InteropServices.DllImport("EpsonFiscalInterface.dll", CharSet = System.Runtime.InteropServices.CharSet.Ansi,
+                                                                                CallingConvention = System.Runtime.InteropServices.CallingConvention.StdCall)]
+        public static extern int ConsultarNumeroComprobanteUltimo(string tipo_de_comprobante, StringBuilder respuesta, int respuesta_largo_maximo);
+
+
+        // [out] String respuesta, int respuesta_largo_maximo
+
+
+        // ConsultarNumeroPuntoDeVenta()
+        [System.Runtime.InteropServices.DllImport("EpsonFiscalInterface.dll", CharSet = System.Runtime.InteropServices.CharSet.Ansi,
+                                                                                CallingConvention = System.Runtime.InteropServices.CallingConvention.StdCall)]
+        public static extern int ConsultarNumeroPuntoDeVenta([Out] StringBuilder respuesta, int respuesta_largo_maximo);
+
+
+
+        // ConsultarFechaHora()
+        [DllImport("EpsonFiscalInterface.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        public static extern int ConsultarFechaHora([Out] StringBuilder respuesta, int respuesta_largo_maximo);
+
+        // EstablecerFechaHora()
+        [DllImport("EpsonFiscalInterface.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        public static extern int EstablecerFechaHora(String fecha_hora);
+
 
         /// <summary>
-        /// //////////////////////////////////////////////////////////////////
+        /// ///////////
         /// </summary>
-
-
-        // ConfigurarVelocidad()
-       
-
-
-        ///////////////////////////////////
 
         /* Globa variable */
         private bool _WorkThreadRunning = false;
 
+        Dictionary<string, string[]> datosSuc = new Dictionary<string, string[]>
+{
+    { "1", new string[] { "1", "RB", "Super AV" } },
+    { "3", new string[] { "3", "RB", "Vesta AV" } },
+    { "13", new string[] { "13", "RB", "Karmia AV" } },
+    { "50", new string[] { "50", "R20", "Ruta 20" } },
+    { "54", new string[] { "54", "R20", "Vesta R20" } },
+    { "110", new string[] { "110", "ML", "Leticia" } },
+    { "200", new string[] { "200", "CVL", "Circunvalación" } },
+    { "250", new string[] { "250", "SAL", "Salsipuedes" } },
+    { "350", new string[] { "350", "60C", "60 Cuadras" } },
+    { "370", new string[] { "370", "AG", "Alta Gracia" } },
+    { "400", new string[] { "400", "COC", "Colonia Caroya" } },
+    { "380", new string[] { "380", "TLH", "Tadicor Las Heras" } },
+    { "390", new string[] { "390", "TSM", "Tadicor San Martin" } }
+};
+
+        /* -----------------------------------------------------------------------------
+        Function: EstablecerFechaHora()
+        ----------------------------------------------------------------------------- */
+        public int setFechaHora(string tipo_de_comprobante)
+        {
+            Conectar();
+            int result = EstablecerFechaHora("");
+            Desconectar();
+            return result;
+        }
+
+        /* -----------------------------------------------------------------------------
+        Function: ConsultarFechaHora()
+        ----------------------------------------------------------------------------- */
+        public DateTime Consultar_FechaHora()
+        {
+            // Declarar una cadena para recibir la respuesta
+            StringBuilder respuesta = new StringBuilder(256); // Ajusta el tamaño máximo según tus necesidades
+
+            // Conectar
+            Conectar();
+
+            try
+            {
+                // Llamar a la función ConsultarFechaHora
+                ConsultarFechaHora(respuesta, respuesta.Capacity);
 
 
-        public void Funciona() {
-            Console.WriteLine("funciona ok");
+                // Valor obtenido de la impresora fiscal
+                string valorImpresora = respuesta.ToString();
+                // Extraer partes
+                int día = int.Parse(valorImpresora.Substring(0, 2));
+                int mes = int.Parse(valorImpresora.Substring(2, 2));
+                int año = int.Parse(valorImpresora.Substring(4, 2));
+                int hora = int.Parse(valorImpresora.Substring(7, 2));
+                int minuto = int.Parse(valorImpresora.Substring(9, 2));
+                int segundo = int.Parse(valorImpresora.Substring(11, 2));
+
+                // Construir objeto DateTime
+                DateTime fechaNCImpresora = new DateTime(2000 + año, mes, día, hora, minuto, segundo);
+
+                return fechaNCImpresora;
+            }
+            catch (Exception)
+            {
+            }
+
+            Desconectar();
+
+            return new DateTime(2000,1,1);
+        }
+
+        /* -----------------------------------------------------------------------------
+        Function: ConsultarNumeroComprobanteUltimo()
+        ----------------------------------------------------------------------------- */
+        public int NumeroComprobanteUltimo(string tipo_de_comprobante)
+        {
+            Conectar();
+            const int respuesta_largo_maximo = 255; // Ajusta la longitud máxima según tus necesidades.
+            StringBuilder respuesta = new StringBuilder(respuesta_largo_maximo);
+            int result = ConsultarNumeroComprobanteUltimo(tipo_de_comprobante, respuesta, respuesta_largo_maximo);
+            Desconectar();
+            return result;
         }
         /* -----------------------------------------------------------------------------
-Function: dll_version()
------------------------------------------------------------------------------ */
+        Function: NumeroPuntoDeVenta()
+        ----------------------------------------------------------------------------- */
+        public string NumeroPuntoDeVenta()
+        {
+            Conectar();
+            const int respuesta_largo_maximo = 255; // Ajusta la longitud máxima según tus necesidades.
+            StringBuilder respuesta = new StringBuilder(respuesta_largo_maximo);
+            int result = ConsultarNumeroPuntoDeVenta(respuesta, respuesta_largo_maximo);
+            Desconectar();
+            return respuesta.ToString();
+            
+        }
+
+
+        /* -----------------------------------------------------------------------------
+        Function: dll_version()
+        ----------------------------------------------------------------------------- */
         public void dll_version()
         {
             const int str_len = 500;
@@ -206,10 +306,12 @@ Function: dll_version()
             int menor = 0;
 
             /* call exported function from "EpsonFiscalInterface.h" */
-            try { 
-                ConsultarVersionDll(str, str_len, ref mayor, ref menor); 
+            try
+            {
+                ConsultarVersionDll(str, str_len, ref mayor, ref menor);
             }
-            catch(Exception e) {
+            catch (Exception e)
+            {
                 Console.WriteLine(e.StackTrace);
             }
 
@@ -219,8 +321,8 @@ Function: dll_version()
         }
 
         /* -----------------------------------------------------------------------------
- Function: print_X_and_Z()
- ----------------------------------------------------------------------------- */
+         Function: print_X_and_Z()
+         ----------------------------------------------------------------------------- */
         public void print_X_and_Z()
         {
             int error;
@@ -274,8 +376,8 @@ Function: dll_version()
         }
 
         /* -----------------------------------------------------------------------------
-    Function: WorkThreadFunction()
-    ----------------------------------------------------------------------------- */
+        Function: WorkThreadFunction()
+        ----------------------------------------------------------------------------- */
         public void WorkThreadFunction()
         {
             try
@@ -286,7 +388,7 @@ Function: dll_version()
                 error = ImprimirCierreX();
                 Console.WriteLine("Closure Cashier (thread number 1): " + error.ToString());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log errors
             }
@@ -298,14 +400,14 @@ Function: dll_version()
             _WorkThreadRunning = false;
         }
         /* -----------------------------------------------------------------------------
-Function: _config_port()
------------------------------------------------------------------------------ */
+        Function: _config_port()
+        ----------------------------------------------------------------------------- */
         public void _config_port()
         {
             int error;
 
             int tmp_baud = 9600;
- 
+
 
 
             /* config baudrate */
@@ -316,12 +418,13 @@ Function: _config_port()
             /* config port */
             //ConfigurarPuerto("0");
             ConfigurarPuerto("usb:USB");
-            
+
             //ConfigurarPuerto("lan:172.22.107.226");
         }
+
         /* -----------------------------------------------------------------------------
-Function: get_description_error()
------------------------------------------------------------------------------ */
+        Function: get_description_error()
+        ----------------------------------------------------------------------------- */
         public string get_description_error(int error_number)
         {
             int error = 0;
@@ -340,117 +443,160 @@ Function: get_description_error()
         /* -----------------------------------------------------------------------------
          Function: test_ticket_cancel()
          ----------------------------------------------------------------------------- */
-        public void test_ticket_inv_cancel()
+        public void test_ticket_inv_cancel(List<GiftData> lista)
         {
-            const int DOC_TYPE_TICKET_INV = 3;
-            //2 .- FACTURA B 
-            //2 .- NOTA CREDITO B 
-            //    error = CargarDatosCliente(,,,,,,, );
-            string nombre_o_razon_social1 ="CONSUMIDOR";
-            string nombre_o_razon_social2 = "FINAL";
-            string domicilio1 = "R20";
-            string domicilio2 = "VESTA R20";
-            string domicilio3 = "";
-            int id_tipo_documento = 1;
-            string numero_documento =  "11111111";
-            int id_responsabilidad_iva =5;
-
-            int error = 0;
-            string description = "";
-
-            /* active log */
-            error = ComenzarLog(true);
-
-            /* config */
-            _config_port();
-
-            /* real conection */
-            error = Conectar();
-            Console.WriteLine("Connect: " + error.ToString());
-
-            /* get description error */
-            if (error != 0)
+            try
             {
-                /* message */
-                description = get_description_error(error);
-                Console.WriteLine("Descripción de error: " + description);
+                Desconectar();
+                string[] sucursal = null;
 
-                /* exit */
-                return;
+
+                if (datosSuc.ContainsKey(lista[0].Nrosuc))
+                {
+                    sucursal = (datosSuc[lista[0].Nrosuc]).ToArray();
+
+                }
+                else
+                {
+                    Console.WriteLine("No se encontró una sucursal. " + lista[0].Nrosuc);
+                }
+
+
+                const int tipo_comprobante = 3;
+                /*
+                 Identificador del tipo de comprobante:
+                 1 – Tique.
+                 2 – Tique factura A/B/C/M.
+                 3 – Tique nota de crédito, tique nota crédito A/B/C/M.
+                 4 – Tique nota de débito A/B/C/M.
+                 21 – Documento no fiscal homologado genérico.
+                 22 – Documento no fiscal homologado de uso interno.
+                 */
+                string nombre_o_razon_social1 = "CONSUMIDOR";
+                string nombre_o_razon_social2 = "FINAL";
+                string domicilio1 = "Suc " + sucursal[0];
+                string domicilio2 = "Suc " + sucursal[1];
+                string domicilio3 = sucursal[2];
+                int id_tipo_documento = 1;
+                string numero_documento = "11111111";
+                int id_responsabilidad_iva = 5;
+
+                int error = 0;
+                string description = "";
+
+                /* active log */
+                error = ComenzarLog(true);
+
+                /* config */
+                _config_port();
+                try
+                {
+
+
+                    /* real conection */
+                    error = Conectar();
+                    
+
+                    /* get description error */
+                    if (error != 0)
+                    {
+                        /* message */
+                        description = get_description_error(error);
+                    
+
+                        /* exit */
+                        return;
+                    }
+
+                    /* previous settings for ticket invoice */
+                    //error = CargarDatosCliente("Nombre Comprador #1", "", "Domicilio Comparador #1", "", "", 1, "3478905", 5);
+                    error = CargarDatosCliente(nombre_o_razon_social1, nombre_o_razon_social2, domicilio1, domicilio2, domicilio3, id_tipo_documento, numero_documento, id_responsabilidad_iva);
+                    //error = CargarComprobanteAsociado("083-00001-00000027");
+
+                    /* open document */
+                    error = AbrirComprobante(tipo_comprobante);
+                    
+
+                    error = CargarTextoExtra("  ");
+                    //impresion 
+                    /*
+                     * 
+                    public static extern int ImprimirItem(int id_modificador, String descripcion,
+                    String cantidad, String precio, int id_tasa_iva, int ii_id, String ii_valor,
+                    int id_codigo, String codigo, String codigo_unidad_matrix, int código_unidad_medida);
+
+                    */
+
+                    const int ID_MODIFICADOR_AGREGAR = 200;//Identificador del modificador sobre el ítem:
+                    /*
+                         200 – Agregar ítem de venta.
+                         201 – Anulación del ítem de venta.
+                         202 – Agregar ítem de retorno envases. (*)
+                         203 – Ajuste ítem de retorno envases. (*)
+                         204 - Agregar ítem de bonificación.
+                         205 - Ajuste ítem de bonificación.
+                         206 - Agregar ítem de descuento. (*)
+                         207 - Ajuste ítem de descuento. (*)
+                         208 - Agregar ítem de seña - anticipo. (*)(**)
+                         209 - Ajuste ítem de seña - anticipo. (*)(**)
+                         210 - Agregar ítem de descuento de seña - anticipo. (*)(**)
+                         211 - Ajuste ítem de descuento de seña - anticipo. (*)(**)
+                    */
+                    foreach (var item in lista)
+                    {
+
+                        string descripcion = "GIFT";//Descripción del ítem.
+                        string cantidad = "1.000";// Multiplicidad del ítem.Expresado bajo la siguiente precisión: “nnnnn.nnnn”. (5, 4)
+                        string precio = item.Importe + "00"; // Precio unitario del ítem. Expresado bajo la siguiente precisión: “nnnnnnn.nnnn”. (7, 4)
+                        const int ID_TASA_IVA_21_00 = 5; //Identificador de tasa de I.V.A.: 0 - Ninguno.  1 - I.V.A.exento.  4 - I.V.A. 10.50 %.  5 - I.V.A. 21.00 %.
+                        const int ID_IMPUESTO_INTERNO_FIJO = 0; //0 – Ninguno.   1 - Impuesto interno fijo.  2 - Impuesto interno porcentual.
+                        string ii_valor = "5.0000"; // Valor del impuesto interno. Expresado bajo la siguiente precisión:  Impuesto interno fijo: “nnnnnnn.nnnn”. (7, 4)  Impuesto interno porcentual: “0.nnnnnnnn”. (0, 8)
+                        const int ID_CODIGO_INTERNO = 1; // Identificador del tipo de código de producto asociado al ítem:  1 - Código interno.  2 - Código matrix.
+                        string codigo = "."; //Valor del código (interno o matrix según campo previo).
+                        string codigo_unidad_matrix = ""; // Valor del código unidad matrix, según será requerido.
+                        const int AFIP_CODIGO_UNIDAD_MEDIDA_KILOGRAMO = 7;//Código de unidad de medida:  5 - Litros  7 - Unidad  14 - Gramo  20 - Centímetro  62 - Pack  63 - Horma 
+
+
+                        error = ImprimirItem(ID_MODIFICADOR_AGREGAR, descripcion, cantidad, precio, ID_TASA_IVA_21_00, ID_IMPUESTO_INTERNO_FIJO, ii_valor, ID_CODIGO_INTERNO, codigo,
+                            codigo_unidad_matrix, AFIP_CODIGO_UNIDAD_MEDIDA_KILOGRAMO);
+
+                    }
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+                    
+
+                    /* get description error */
+                    description = get_description_error(error);
+                    
+
+                }
+                catch (Exception) { }
+                finally
+                {
+
+                    /* cancel */
+                    error = Cancelar();
+
+                    /* close document | just in case */
+                    error = CerrarComprobante();
+
+                    /* close port */
+                   Desconectar();
+                    
+
+                    /* deactive log */
+                    DetenerLog();
+                }
+
             }
-
-            /* previous settings for ticket invoice */
-            //error = CargarDatosCliente("Nombre Comprador #1", "", "Domicilio Comparador #1", "", "", 1, "3478905", 5);
-            error = CargarDatosCliente(nombre_o_razon_social1, nombre_o_razon_social2, domicilio1, domicilio2, domicilio3, id_tipo_documento, numero_documento, id_responsabilidad_iva);
-            error = CargarComprobanteAsociado("083-00001-00000027");
-
-            /* open document */
-            error = AbrirComprobante(DOC_TYPE_TICKET_INV);
-            Console.WriteLine("AbrirComprobante: " + error.ToString());
-
-            error = CargarTextoExtra("  ");
-            Console.WriteLine("CargarTextoExtra: " + error.ToString());
-            /*
-            public static extern int ImprimirItem(int id_modificador, String descripcion,
-String cantidad, String precio, int id_tasa_iva, int ii_id, String ii_valor,
-int id_codigo, String codigo, String codigo_unidad_matrix, int código_unidad_medida);
-            */
-            
-            const int ID_MODIFICADOR_AGREGAR = 200;//Identificador del modificador sobre el ítem:
-            /*
-                 200 – Agregar ítem de venta.
-                 201 – Anulación del ítem de venta.
-                 202 – Agregar ítem de retorno envases. (*)
-                 203 – Ajuste ítem de retorno envases. (*)
-                 204 - Agregar ítem de bonificación.
-                 205 - Ajuste ítem de bonificación.
-                 206 - Agregar ítem de descuento. (*)
-                 207 - Ajuste ítem de descuento. (*)
-                 208 - Agregar ítem de seña - anticipo. (*)(**)
-                 209 - Ajuste ítem de seña - anticipo. (*)(**)
-                 210 - Agregar ítem de descuento de seña - anticipo. (*)(**)
-                 211 - Ajuste ítem de descuento de seña - anticipo. (*)(**)
-            */
-            string descripcion = "GIFT";//Descripción del ítem.
-            string cantidad = "1.000";// Multiplicidad del ítem.Expresado bajo la siguiente precisión: “nnnnn.nnnn”. (5, 4)
-            string precio = "100.0000"; // Precio unitario del ítem. Expresado bajo la siguiente precisión: “nnnnnnn.nnnn”. (7, 4)
-            const int ID_TASA_IVA_21_00 = 5; //Identificador de tasa de I.V.A.: 0 - Ninguno.  1 - I.V.A.exento.  4 - I.V.A. 10.50 %.  5 - I.V.A. 21.00 %.
-            const int ID_IMPUESTO_INTERNO_FIJO = 0; //0 – Ninguno.   1 - Impuesto interno fijo.  2 - Impuesto interno porcentual.
-            string ii_valor = "5.0000"; // Valor del impuesto interno. Expresado bajo la siguiente precisión:  Impuesto interno fijo: “nnnnnnn.nnnn”. (7, 4)  Impuesto interno porcentual: “0.nnnnnnnn”. (0, 8)
-            const int ID_CODIGO_INTERNO = 1; // Identificador del tipo de código de producto asociado al ítem:  1 - Código interno.  2 - Código matrix.
-            string codigo = "."; //Valor del código (interno o matrix según campo previo).
-            string codigo_unidad_matrix = ""; // Valor del código unidad matrix, según será requerido.
-            const int AFIP_CODIGO_UNIDAD_MEDIDA_KILOGRAMO = 7;//Código de unidad de medida:  5 - Litros  7 - Unidad  14 - Gramo  20 - Centímetro  62 - Pack  63 - Horma 
-
-
-            error = ImprimirItem(ID_MODIFICADOR_AGREGAR, descripcion, cantidad, precio, ID_TASA_IVA_21_00, ID_IMPUESTO_INTERNO_FIJO, ii_valor, ID_CODIGO_INTERNO, codigo,
-                codigo_unidad_matrix, AFIP_CODIGO_UNIDAD_MEDIDA_KILOGRAMO);
-
-            error = CargarTextoExtra("  ");
-            error = CargarTextoExtra("  ");
-            error = CargarTextoExtra("  ");
-            error = CargarTextoExtra("  ");
-            error = CargarTextoExtra("  ");
-            error = CargarTextoExtra("  ");
-            Console.WriteLine("CargarTextoExtra: " + error.ToString());
-
-            /* get description error */
-            description = get_description_error(error);
-            Console.WriteLine("Descripción de error: " + description);
-
-            /* cancel */
-            error = Cancelar();
-
-            /* close document | just in case */
-            error = CerrarComprobante();
-
-            /* close port */
-            error = Desconectar();
-            Console.WriteLine("Disconect: " + error.ToString());
-
-            /* deactive log */
-            DetenerLog();
-
+            catch (Exception)
+            {
+                Desconectar();
+            }
 
         }
     }

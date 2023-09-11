@@ -8,4 +8,8 @@
     <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.0" />
+  </ItemGroup>
+
 </Project>
