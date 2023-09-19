@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 class Program
 {
+    static void Main()
     {
 
         EpsonFiscalControlador epson = new();
@@ -15,7 +16,7 @@ class Program
             Console.WriteLine("Seleccione una opción:");
             Console.WriteLine("1 - Realizar ticket de prueba");
             Console.WriteLine("2 - Realizar cierre 'X' y 'Z'");
-            Console.WriteLine("5 - modificar Fecha Hora");
+            Console.WriteLine("4 - modificar Fecha Hora");
             Console.WriteLine("5 - Consultar Fecha Hora");
             Console.WriteLine("6 - Nro PV");
             Console.WriteLine("7 - Ultima NC");
@@ -73,20 +74,25 @@ class Program
 
     static void RealizarTicketDePrueba(EpsonFiscalControlador epson)
     {
+        int limiteFacturacion = 1000000;//tope de importe por factura 
         Console.WriteLine("Desea realizar ticket de prueba?");
         Console.WriteLine("Presione 'S' para continuar o cualquier tecla para cancelar");
         string a = Console.ReadLine() + "";
         if (a.ToLower() == "s")
         {
             //int[] sucursales = { 1, 3, 13, 50, 54, 110, 200, 250, 350, 370, 400, 380, 390 };
+            //MODIFICACION PARA OBTENER SUCURSALES DE BBDD
             int[] sucursales = { 13 }; // para pruebas
+            DatabaseHelper dbHelper = new DatabaseHelper();
+            int diasDesface = 1;
+         
             foreach (var suc in sucursales)
             {
                 Console.WriteLine("Inicio sucursal " + suc);
-                string Fecha = DateTime.Now.AddDays(-30).ToString("yyyyMMdd");
-                DatabaseHelper dbHelper = new DatabaseHelper();
+               
+                string Fecha = DateTime.Now.AddDays(-diasDesface).ToString("yyyyMMdd");
+                
                 List<GiftData> lista = dbHelper.ExecuteStoredProcedure<GiftData>(Fecha, suc);
- /////////////////////////
                 List<List<GiftData>> sublistas = new List<List<GiftData>>();
                 decimal acumulado = 0;
                 int currentIndex = 0;
@@ -99,9 +105,8 @@ class Program
                     for (; currentIndex < lista.Count; currentIndex++)
                     {
                         GiftData item = lista[currentIndex];
-                        if (sublistaAcumulada + item.Importe > 1000000)
+                        if (sublistaAcumulada + item.Importe > limiteFacturacion)
                         {
-                            // Si agregar este elemento superaría el millón, detén el bucle.
                             break;
                         }
 
@@ -112,15 +117,12 @@ class Program
                     sublistas.Add(sublistaTemporal);
                 }
 
-                // Ahora tienes sublistas que contienen elementos cuya suma de importes no supera el millón.
                 foreach (var sublista in sublistas)
                 {
-                    // Realiza las operaciones necesarias en cada sublista
                     epson.test_ticket_inv_cancel(sublista);
 
                     foreach (var f in sublista)
                     {
-                        // Realiza las operaciones necesarias en cada elemento de la sublista
                         int nroNC = epson.NumeroComprobanteUltimo("3");
                         string nroPVNC = epson.NumeroPuntoDeVenta();
                         int nroZ = 0000;
@@ -129,12 +131,15 @@ class Program
                     }
                     
                 }
-//////////////////////////
+                
                 Console.WriteLine("Fecha: "+epson.Consultar_FechaHora());
                 Console.WriteLine("PV: " + epson.NumeroPuntoDeVenta());
                 Console.WriteLine("comprobante: " + epson.NumeroComprobanteUltimo("3"));
                 Console.WriteLine("Fin sucursal " + suc);
             }
+
+            int nroz = epson.cierreZ();
+            dbHelper.UpdateZnro(DateTime.Now, nroz);
         }
     }
 

@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -155,7 +158,7 @@ namespace NotaCreditoGiftCard
         public static extern int ImprimirAuditoria(int id_modificador, string desde, string hasta);
 
 
-        // ImprimirAuditoria()
+        // EstablecerCola()
         [System.Runtime.InteropServices.DllImport("EpsonFiscalInterface.dll", CharSet = System.Runtime.InteropServices.CharSet.Ansi,
                                                                                 CallingConvention = System.Runtime.InteropServices.CallingConvention.StdCall)]
         public static extern int EstablecerCola(int numero_cola, string descripcion);
@@ -192,6 +195,11 @@ namespace NotaCreditoGiftCard
         public static extern int EstablecerFechaHora(String fecha_hora);
 
 
+
+     
+
+
+
         /// <summary>
         /// ///////////
         /// </summary>
@@ -221,6 +229,7 @@ namespace NotaCreditoGiftCard
         ----------------------------------------------------------------------------- */
         public int setFechaHora(string tipo_de_comprobante)
         {
+            _config_port();
             Conectar();
             int result = EstablecerFechaHora("");
             Desconectar();
@@ -234,7 +243,7 @@ namespace NotaCreditoGiftCard
         {
             // Declarar una cadena para recibir la respuesta
             StringBuilder respuesta = new StringBuilder(256); // Ajusta el tamaño máximo según tus necesidades
-
+            _config_port();
             // Conectar
             Conectar();
 
@@ -273,6 +282,7 @@ namespace NotaCreditoGiftCard
         ----------------------------------------------------------------------------- */
         public int NumeroComprobanteUltimo(string tipo_de_comprobante)
         {
+            _config_port();
             Conectar();
             const int respuesta_largo_maximo = 255; // Ajusta la longitud máxima según tus necesidades.
             StringBuilder respuesta = new StringBuilder(respuesta_largo_maximo);
@@ -280,11 +290,40 @@ namespace NotaCreditoGiftCard
             Desconectar();
             return result;
         }
+
+        /* -----------------------------------------------------------------------------
+        Function: Auditoria()
+        ----------------------------------------------------------------------------- */
+        public int Auditoria()
+        {
+            _config_port();
+            Conectar();
+            const int respuesta_largo_maximo = 255; // Ajusta la longitud máxima según tus necesidades.
+            StringBuilder respuesta = new StringBuilder(respuesta_largo_maximo);
+            int result = ImprimirAuditoria(501, DateTime.Now.AddDays(0).ToString("ddMMyy"), DateTime.Now.AddDays(-1).ToString("ddMMyy"));
+            Desconectar();
+            return result;
+        }
+
+        /* -----------------------------------------------------------------------------
+        Function: cierreZ()
+        ----------------------------------------------------------------------------- */
+        public int cierreZ()
+        {
+            _config_port();
+            Conectar();
+            int result = ImprimirCierreZ();
+            Desconectar();
+            return result;
+        }
+
+
         /* -----------------------------------------------------------------------------
         Function: NumeroPuntoDeVenta()
         ----------------------------------------------------------------------------- */
         public string NumeroPuntoDeVenta()
         {
+            _config_port();
             Conectar();
             const int respuesta_largo_maximo = 255; // Ajusta la longitud máxima según tus necesidades.
             StringBuilder respuesta = new StringBuilder(respuesta_largo_maximo);
@@ -365,7 +404,7 @@ namespace NotaCreditoGiftCard
 
             /* print z */
             error = ImprimirCierreZ();
-            Console.WriteLine("Closure Day: " + error.ToString());
+            Console.WriteLine("nro cierre  Z Closure Day: " + error.ToString());
 
             /* close port */
             error = Desconectar();
