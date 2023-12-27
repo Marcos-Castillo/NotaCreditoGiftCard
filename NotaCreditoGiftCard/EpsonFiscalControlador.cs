@@ -282,15 +282,67 @@ namespace NotaCreditoGiftCard
         ----------------------------------------------------------------------------- */
         public int NumeroComprobanteUltimo(string tipo_de_comprobante)
         {
-            _config_port();
-            Conectar();
-            const int respuesta_largo_maximo = 255; // Ajusta la longitud máxima según tus necesidades.
-            StringBuilder respuesta = new StringBuilder(respuesta_largo_maximo);
-            int result = ConsultarNumeroComprobanteUltimo(tipo_de_comprobante, respuesta, respuesta_largo_maximo);
-            Desconectar();
-            return result;
-        }
+            const int DOC_TYPE_TICKET = 3;
+            const int DOC_TYPE_DNF = 21;
 
+            int error;
+            int nro = 0;
+
+            /* active log */
+            error = ComenzarLog(true);
+
+            /* config */
+            _config_port();
+
+            /* real conection */
+            error = Conectar();
+            //Console.WriteLine("Connect: " + error.ToString());
+
+            /* open document dnf */
+            AbrirComprobante(DOC_TYPE_TICKET);
+
+            /* !!! TEST !!! */
+            nro = get_current_document();
+
+            Cancelar();
+            /* close document */
+            CerrarComprobante();
+
+            /* close port */
+            error = Desconectar();
+            //Console.WriteLine("Disconect: " + error.ToString());
+
+            /* deactive log */
+            DetenerLog();
+            
+            return --nro;
+
+            }
+        int get_current_document()
+            {
+            const int str_len = 500;
+            StringBuilder str = new StringBuilder(str_len);
+
+            /* call exported function from "EpsonFiscalInterface.h" */
+            int error = ConsultarNumeroComprobanteActual(str, str_len);
+
+            /* show */
+            string msg = "-Error: " + error.ToString() + Environment.NewLine + Environment.NewLine + "-Num.Doc: ";
+            int numero = 0;
+            numero = int.Parse(str.ToString());
+            //Console.WriteLine(msg);
+
+
+
+            /* call exported function from "EpsonFiscalInterface.h" */
+            error = ConsultarTipoComprobanteActual(str, str_len);
+
+            /* show */
+            msg = "-Error: " + error.ToString() + Environment.NewLine + Environment.NewLine + "-Tipo.Doc: " + str.ToString();
+            //Console.WriteLine(msg);
+
+            return numero;
+            }
         /* -----------------------------------------------------------------------------
         Function: Auditoria()
         ----------------------------------------------------------------------------- */
@@ -365,7 +417,6 @@ namespace NotaCreditoGiftCard
         public void print_X_and_Z()
         {
             int error;
-
             /* active log */
             error = ComenzarLog(true);
 
@@ -375,10 +426,12 @@ namespace NotaCreditoGiftCard
             /* real conection */
             error = Conectar();
             Console.WriteLine("Connect: " + error.ToString());
+            
 
             /* print x */
             error = ImprimirCierreX();
             Console.WriteLine("Closure Cashier #1: " + error.ToString());
+            
 
 
             /* test DLL into threads  (Remember: this DLL HL is MONO-THREAD)
@@ -404,7 +457,7 @@ namespace NotaCreditoGiftCard
 
             /* print z */
             error = ImprimirCierreZ();
-            Console.WriteLine("nro cierre  Z Closure Day: " + error.ToString());
+                        Console.WriteLine("nro cierre  Z Closure Day: " + error.ToString());
 
             /* close port */
             error = Desconectar();
@@ -483,22 +536,22 @@ namespace NotaCreditoGiftCard
          Function: test_ticket_cancel()
          ----------------------------------------------------------------------------- */
         public void test_ticket_inv_cancel(List<GiftData> lista)
-        {
-            try
             {
+            try
+                {
                 Desconectar();
                 string[] sucursal = null;
 
 
                 if (datosSuc.ContainsKey(lista[0].Nrosuc))
-                {
+                    {
                     sucursal = (datosSuc[lista[0].Nrosuc]).ToArray();
 
-                }
+                    }
                 else
-                {
+                    {
                     Console.WriteLine("No se encontró una sucursal. " + lista[0].Nrosuc);
-                }
+                    }
 
 
                 const int tipo_comprobante = 3;
@@ -529,23 +582,23 @@ namespace NotaCreditoGiftCard
                 /* config */
                 _config_port();
                 try
-                {
+                    {
 
 
                     /* real conection */
                     error = Conectar();
-                    
+
 
                     /* get description error */
                     if (error != 0)
-                    {
+                        {
                         /* message */
                         description = get_description_error(error);
-                    
+
 
                         /* exit */
                         return;
-                    }
+                        }
 
                     /* previous settings for ticket invoice */
                     //error = CargarDatosCliente("Nombre Comprador #1", "", "Domicilio Comparador #1", "", "", 1, "3478905", 5);
@@ -554,8 +607,8 @@ namespace NotaCreditoGiftCard
 
                     /* open document */
                     error = AbrirComprobante(tipo_comprobante);
-                    
 
+                    DatabaseHelper.NroNc = get_current_document();
                     error = CargarTextoExtra("  ");
                     //impresion 
                     /*
@@ -582,7 +635,8 @@ namespace NotaCreditoGiftCard
                          211 - Ajuste ítem de descuento de seña - anticipo. (*)(**)
                     */
                     foreach (var item in lista)
-                    {
+                        {
+                        bool seAnula = lista.Any(otherItem => otherItem != item && otherItem.Importe == -item.Importe);
 
                         string descripcion = "GIFT";//Descripción del ítem.
                         string cantidad = "1.000";// Multiplicidad del ítem.Expresado bajo la siguiente precisión: “nnnnn.nnnn”. (5, 4)
@@ -599,44 +653,204 @@ namespace NotaCreditoGiftCard
                         error = ImprimirItem(ID_MODIFICADOR_AGREGAR, descripcion, cantidad, precio, ID_TASA_IVA_21_00, ID_IMPUESTO_INTERNO_FIJO, ii_valor, ID_CODIGO_INTERNO, codigo,
                             codigo_unidad_matrix, AFIP_CODIGO_UNIDAD_MEDIDA_KILOGRAMO);
 
-                    }
+                        }
                     error = CargarTextoExtra("  ");
                     error = CargarTextoExtra("  ");
                     error = CargarTextoExtra("  ");
                     error = CargarTextoExtra("  ");
                     error = CargarTextoExtra("  ");
                     error = CargarTextoExtra("  ");
-                    
+
 
                     /* get description error */
                     description = get_description_error(error);
-                    
 
-                }
+
+                    }
                 catch (Exception) { }
                 finally
-                {
+                    {
 
                     /* cancel */
-                    error = Cancelar();
+                    //error = Cancelar();//comentado en prod
 
                     /* close document | just in case */
                     error = CerrarComprobante();
 
                     /* close port */
-                   Desconectar();
-                    
+                    Desconectar();
+
 
                     /* deactive log */
                     DetenerLog();
+                    }
+
+                }
+            catch (Exception)
+                {
+                Desconectar();
                 }
 
             }
-            catch (Exception)
+        /* -----------------------------------------------------------------------------
+ Function: test_ticket_cancel()
+ ----------------------------------------------------------------------------- */
+        public void test_ticket_cf(List<GiftData> lista)
             {
+            try
+                {
                 Desconectar();
-            }
+                string[] sucursal = null;
 
+
+                if (datosSuc.ContainsKey(lista[0].Nrosuc))
+                    {
+                    sucursal = (datosSuc[lista[0].Nrosuc]).ToArray();
+
+                    }
+                else
+                    {
+                    Console.WriteLine("No se encontró una sucursal. " + lista[0].Nrosuc);
+                    }
+
+
+                const int tipo_comprobante = 2;
+                /*
+                 Identificador del tipo de comprobante:
+                 1 – Tique.
+                 2 – Tique factura A/B/C/M.
+                 3 – Tique nota de crédito, tique nota crédito A/B/C/M.
+                 4 – Tique nota de débito A/B/C/M.
+                 21 – Documento no fiscal homologado genérico.
+                 22 – Documento no fiscal homologado de uso interno.
+                 */
+                string nombre_o_razon_social1 = "CONSUMIDOR";
+                string nombre_o_razon_social2 = "FINAL";
+                string domicilio1 = "Suc " + sucursal[0];
+                string domicilio2 = "Suc " + sucursal[1];
+                string domicilio3 = sucursal[2];
+                int id_tipo_documento = 1;
+                string numero_documento = "11111111";
+                int id_responsabilidad_iva = 5;
+
+                int error = 0;
+                string description = "";
+
+                /* active log */
+                error = ComenzarLog(true);
+
+                /* config */
+                _config_port();
+                try
+                    {
+
+
+                    /* real conection */
+                    error = Conectar();
+
+
+                    /* get description error */
+                    if (error != 0)
+                        {
+                        /* message */
+                        description = get_description_error(error);
+
+
+                        /* exit */
+                        return;
+                        }
+
+                    /* previous settings for ticket invoice */
+                    //error = CargarDatosCliente("Nombre Comprador #1", "", "Domicilio Comparador #1", "", "", 1, "3478905", 5);
+                    error = CargarDatosCliente(nombre_o_razon_social1, nombre_o_razon_social2, domicilio1, domicilio2, domicilio3, id_tipo_documento, numero_documento, id_responsabilidad_iva);
+                    //error = CargarComprobanteAsociado("083-00001-00000027");
+
+                    /* open document */
+                    error = AbrirComprobante(tipo_comprobante);
+
+                    DatabaseHelper.NroNc = get_current_document();
+                    error = CargarTextoExtra("  ");
+                    //impresion 
+                    /*
+                     * 
+                    public static extern int ImprimirItem(int id_modificador, String descripcion,
+                    String cantidad, String precio, int id_tasa_iva, int ii_id, String ii_valor,
+                    int id_codigo, String codigo, String codigo_unidad_matrix, int código_unidad_medida);
+
+                    */
+
+                    const int ID_MODIFICADOR_AGREGAR = 200;//Identificador del modificador sobre el ítem:
+                    /*
+                         200 – Agregar ítem de venta.
+                         201 – Anulación del ítem de venta.
+                         202 – Agregar ítem de retorno envases. (*)
+                         203 – Ajuste ítem de retorno envases. (*)
+                         204 - Agregar ítem de bonificación.
+                         205 - Ajuste ítem de bonificación.
+                         206 - Agregar ítem de descuento. (*)
+                         207 - Ajuste ítem de descuento. (*)
+                         208 - Agregar ítem de seña - anticipo. (*)(**)
+                         209 - Ajuste ítem de seña - anticipo. (*)(**)
+                         210 - Agregar ítem de descuento de seña - anticipo. (*)(**)
+                         211 - Ajuste ítem de descuento de seña - anticipo. (*)(**)
+                    */
+                    foreach (var item in lista)
+                        {
+                        bool seAnula = lista.Any(otherItem => otherItem != item && otherItem.Importe == -item.Importe);
+
+                        string descripcion = "GIFT";//Descripción del ítem.
+                        string cantidad = "1.000";// Multiplicidad del ítem.Expresado bajo la siguiente precisión: “nnnnn.nnnn”. (5, 4)
+                        string precio = item.Importe + "00"; // Precio unitario del ítem. Expresado bajo la siguiente precisión: “nnnnnnn.nnnn”. (7, 4)
+                        const int ID_TASA_IVA_21_00 = 5; //Identificador de tasa de I.V.A.: 0 - Ninguno.  1 - I.V.A.exento.  4 - I.V.A. 10.50 %.  5 - I.V.A. 21.00 %.
+                        const int ID_IMPUESTO_INTERNO_FIJO = 0; //0 – Ninguno.   1 - Impuesto interno fijo.  2 - Impuesto interno porcentual.
+                        string ii_valor = "5.0000"; // Valor del impuesto interno. Expresado bajo la siguiente precisión:  Impuesto interno fijo: “nnnnnnn.nnnn”. (7, 4)  Impuesto interno porcentual: “0.nnnnnnnn”. (0, 8)
+                        const int ID_CODIGO_INTERNO = 1; // Identificador del tipo de código de producto asociado al ítem:  1 - Código interno.  2 - Código matrix.
+                        string codigo = "."; //Valor del código (interno o matrix según campo previo).
+                        string codigo_unidad_matrix = ""; // Valor del código unidad matrix, según será requerido.
+                        const int AFIP_CODIGO_UNIDAD_MEDIDA_KILOGRAMO = 7;//Código de unidad de medida:  5 - Litros  7 - Unidad  14 - Gramo  20 - Centímetro  62 - Pack  63 - Horma 
+
+
+                        error = ImprimirItem(ID_MODIFICADOR_AGREGAR, descripcion, cantidad, precio, ID_TASA_IVA_21_00, ID_IMPUESTO_INTERNO_FIJO, ii_valor, ID_CODIGO_INTERNO, codigo,
+                            codigo_unidad_matrix, AFIP_CODIGO_UNIDAD_MEDIDA_KILOGRAMO);
+
+                        }
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+                    error = CargarTextoExtra("  ");
+
+
+                    /* get description error */
+                    description = get_description_error(error);
+
+
+                    }
+                catch (Exception) { }
+                finally
+                    {
+
+                    /* cancel */
+                    //error = Cancelar();//comentado en prod
+
+                    /* close document | just in case */
+                    error = CerrarComprobante();
+
+                    /* close port */
+                    Desconectar();
+
+
+                    /* deactive log */
+                    DetenerLog();
+                    }
+
+                }
+            catch (Exception)
+                {
+                Desconectar();
+                }
+
+            }
         }
-    }
 }

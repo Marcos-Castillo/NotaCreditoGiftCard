@@ -1,0 +1,10 @@
+C:\Users\mcastillo\Desktop\publicacion\NotaCreditoGiftCard.exe
+C:\Users\mcastillo\Desktop\publicacion\NotaCreditoGiftCard.dll
+C:\Users\mcastillo\Desktop\publicacion\NotaCreditoGiftCard.deps.json
+C:\Users\mcastillo\Desktop\publicacion\NotaCreditoGiftCard.runtimeconfig.json
+C:\Users\mcastillo\Desktop\publicacion\NotaCreditoGiftCard.pdb
+C:\Users\mcastillo\Desktop\publicacion\Dapper.dll
+C:\Users\mcastillo\Desktop\publicacion\runtimes\win7-x64\native\sni.dll
+C:\Users\mcastillo\Desktop\publicacion\runtimes\win7-x86\native\sni.dll
+C:\Users\mcastillo\Desktop\publicacion\runtimes\unix\lib\netstandard1.3\System.Data.SqlClient.dll
+C:\Users\mcastillo\Desktop\publicacion\runtimes\win\lib\netstandard1.3\System.Data.SqlClient.dll
